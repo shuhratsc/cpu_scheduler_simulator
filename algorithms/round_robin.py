@@ -5,7 +5,8 @@ from algorithms.base_algorithm import BaseAlgorithm
 
 
 class RR(BaseAlgorithm):
-    quantum = 1
+    quantum = 1 
+    process_compare_prop = 'arrival_time'
 
     def __init__(self, processes):
         super().__init__(processes)
@@ -19,10 +20,9 @@ class RR(BaseAlgorithm):
         Run the RR algorithm
         :return: {
             "processes": list of executed processes,
-            "time": total time of execution,
-            "cpu_utilization": total CPU utilization,
+            "total_time": total time of execution,
             "throughput": total throughput,
-            "average_waiting_time": average waiting time,
+            "average_turnaround_over_service": average waiting time,
             "average_turnaround_time": average turnaround time,
             "average_response_time": average response time
         }
@@ -33,7 +33,7 @@ class RR(BaseAlgorithm):
             if self.running_process and self.running_process.remaining_time == 0:
                 self.running_process.end_time = self.time
                 self.running_process.turnaround_time = self.running_process.end_time - self.running_process.arrival_time
-                self.running_process.waiting_time = self.running_process.turnaround_time - self.running_process.burst_time
+                self.running_process.turnaround_over_service = self.running_process.turnaround_time / self.running_process.service_time
                 executed_processes.append(self.running_process)
                 self.running_process = None
 
@@ -43,7 +43,7 @@ class RR(BaseAlgorithm):
             arrived_processes = self.get_arrived_processes()
 
             if arrived_processes:
-                highest_priority_process = min(arrived_processes, key=lambda process: process.priority)
+                highest_priority_process = min(arrived_processes, key=lambda process: process.arrival_time)
 
                 if self.running_process is None:
                     self.running_process = highest_priority_process
@@ -79,9 +79,9 @@ class RR(BaseAlgorithm):
         # Calculate total time, CPU utilization, throughput, average waiting time, average turnaround time,
         # average response time
         total_time = self.time
-        cpu_utilization = (total_time - self.idle_time) / total_time
         throughput = len(executed_processes) / total_time
-        average_waiting_time = sum(process.waiting_time for process in executed_processes) / len(executed_processes)
+        average_turnaround_over_service= sum(process.turnaround_over_service for process in executed_processes) /len(
+            executed_processes)
         average_turnaround_time = sum(process.turnaround_time for process in executed_processes) / len(
             executed_processes)
         average_response_time = sum(process.start_time - process.arrival_time for process in executed_processes) / len(
@@ -89,9 +89,8 @@ class RR(BaseAlgorithm):
         return {
             "processes": executed_processes,
             "total_time": total_time,
-            "cpu_utilization": cpu_utilization,
             "throughput": throughput,
-            "average_waiting_time": average_waiting_time,
+            "average_turnaround_over_service": average_turnaround_over_service,
             "average_turnaround_time": average_turnaround_time,
             "average_response_time": average_response_time
         }

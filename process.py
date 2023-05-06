@@ -10,7 +10,7 @@ class Process:
     Process class for the scheduler simulation.
     """
 
-    def __init__(self, pid, arrival_time, service_time, disk_i_o_time, disk_i_o_inter):
+    def __init__(self, pid, arrival_time, service_time, disk_i_o_time, disk_i_o_inter, compare_prop = 'arrival_time'):
         """
         Initialize a process.
         """
@@ -27,6 +27,7 @@ class Process:
         self.turnaround_time = 'n/a'
         self.turnaround_over_service = 'n/a'
         self.state = State.READY
+        self.compare_prop = compare_prop
 
     #@property
     #def response_time(self):

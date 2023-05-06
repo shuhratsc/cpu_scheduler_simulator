@@ -67,7 +67,8 @@ class SRT(BaseAlgorithm):
             # If no process is running, then pick the process from ready queue
             if self.running_process is None and self.ready_queue:
                 self.running_process = self.ready_queue.popleft()
-                self.running_process.start_time = self.running_process.start_time or self.time
+                if self.running_process.start_time == 'n/a':
+                    self.running_process.start_time = self.time
 
             # If process is running, then get next important time and update the time
             next_time = self.get_next_important_time()

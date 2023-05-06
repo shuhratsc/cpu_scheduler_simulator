@@ -18,10 +18,9 @@ class FCFS(BaseAlgorithm):
         Run the algorithm.
         :return: {
             "processes": list of executed processes,
-            "time": total time of execution,
-            "cpu_utilization": total CPU utilization,
+            "total_time": total time of execution,
             "throughput": total throughput,
-            "average_waiting_time": average waiting time,
+            "average_turnaround_over_service": average waiting time,
             "average_turnaround_time": average turnaround time,
             "average_response_time": average response time
         }
