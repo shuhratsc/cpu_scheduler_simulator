@@ -5,7 +5,7 @@ class BaseAlgorithm:
     """
     Base class for all algorithms.
     """
-    process_compare_prop = 'arrival_time'
+    #process_compare_prop = 'arrival_time'
 
     def __init__(self, processes):
         """

@@ -67,8 +67,7 @@ class Simulate:
                         service_time=process['service_time'],
                         disk_i_o_time=process['disk_i_o_time'],
                         disk_i_o_inter=process['disk_i_o_inter'],
-                        #priority=process['priority'],
-                        compare_prop=self.AlgorithmClass.process_compare_prop
+                        #compare_prop=self.AlgorithmClass.process_compare_prop
                     )
                 )
                 self.process_num += 1

@@ -5,6 +5,7 @@ Generate a json dataset for simulation
 import argparse
 import json
 import random
+import numpy
 
 parser = argparse.ArgumentParser(description='Generate a json dataset for simulation')
 parser.add_argument('--output', '-o', type=str, default='dataset.json', help='Output file')
@@ -18,13 +19,22 @@ class ProcessGenerator:
 
     def generate(self):
         for i in range(self.size):
+            arrival = random.randint(0,100)
+            service = random.randint(0,100)
+            io = random.randint(0,service)
             self.processes.append({
                 'pid': i,
-                'arrival_time': random.randint(0, 100),
-                'priority': random.randint(0, 10),
-                'burst_time': random.randint(0, 100),
+                'arrival_time': arrival,
+                'service_time': service,
+                'disk_i_o_time': io,
+                'disk_i_o_inter': self.generate_list(io, service),
             })
-
+    
+    def generate_list(self, length, max_val):
+        myList=numpy.random.permutation(max_val)[:length].tolist()
+        myList.sort()
+        return myList
+            
     def save(self, output):
         with open(output, 'w') as f:
             json.dump(self.processes, f)

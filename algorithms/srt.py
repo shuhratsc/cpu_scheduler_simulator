@@ -5,7 +5,7 @@ from algorithms.base_algorithm import BaseAlgorithm
 
 
 class SRT(BaseAlgorithm):
-    process_compare_prop = 'remaining_time'
+    #process_compare_prop = 'remaining_time'
 
     def __init__(self, processes):
         processes = sorted(processes, key=lambda x: (x.arrival_time, x.service_time))
@@ -114,7 +114,8 @@ class SRT(BaseAlgorithm):
         Append process to ready queue based on priority.
         :param process: process to be appended
         """
-        bisect.insort(self.ready_queue, process)
+        #bisect.insort(self.ready_queue, process)
+        self.ready_queue.append(process)
 
     def get_next_important_time(self):
         """
