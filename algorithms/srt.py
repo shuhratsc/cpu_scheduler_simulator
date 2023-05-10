@@ -32,8 +32,8 @@ class SRT(BaseAlgorithm):
         while self.processes or self.ready_queue or self.running_process:
 
             if self.running_process and self.running_process.remaining_time == 0:
-                self.running_process.end_time = self.time
-                self.running_process.turnaround_time = self.running_process.end_time - self.running_process.arrival_time
+                self.running_process.finish_time = self.time
+                self.running_process.turnaround_time = self.running_process.finish_time - self.running_process.arrival_time
                 self.running_process.turnaround_over_service = self.running_process.turnaround_time / self.running_process.service_time
                 executed_processes.append(self.running_process)
                 self.running_process = None
@@ -44,16 +44,20 @@ class SRT(BaseAlgorithm):
             arrived_processes = self.get_arrived_processes()
 
             if arrived_processes:
-                min_process = min(arrived_processes, key=lambda x: x.service_time)
+                min_process = min(arrived_processes, key=lambda x: x.remaining_time)
 
                 if self.running_process is None:
                     self.running_process = min_process
                     self.running_process.start_time = self.time
+                    self.running_process.response_time = self.running_process.start_time - self.running_process.arrival_time
 
                 elif self.running_process.remaining_time > min_process.remaining_time:
                     self.append_to_ready_queue(self.running_process)
                     self.running_process = min_process
                     self.running_process.start_time = self.time
+                    self.running_process.response_time = self.running_process.start_time - self.running_process.arrival_time
+
+
 
                 for _ in range(len(arrived_processes)):
                     self.processes.popleft()
@@ -69,6 +73,9 @@ class SRT(BaseAlgorithm):
                 self.running_process = self.ready_queue.popleft()
                 if self.running_process.start_time == 'n/a':
                     self.running_process.start_time = self.time
+                    self.running_process.response_time = self.running_process.start_time - self.running_process.arrival_time
+
+
 
             # If process is running, then get next important time and update the time
             next_time = self.get_next_important_time()
@@ -85,7 +92,7 @@ class SRT(BaseAlgorithm):
         average_turnaround_over_service = sum(process.turnaround_over_service for process in executed_processes) / len(executed_processes)
         average_turnaround_time = sum(process.turnaround_time for process in executed_processes) / len(
             executed_processes)
-        average_response_time = sum(process.start_time - process.arrival_time for process in executed_processes) / len(
+        average_response_time = sum(process.response_time for process in executed_processes) / len(
             executed_processes)
         return {
             "processes": executed_processes,
