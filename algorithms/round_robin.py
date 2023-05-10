@@ -61,7 +61,8 @@ class RR(BaseAlgorithm):
 
             # If process is running, then get next important time and update the time
             next_time = self.get_next_important_time()
-            self.running_process.remaining_time -= (next_time - self.time)
+            if self.running_process:
+                self.running_process.remaining_time -= self.quantum 
             self.time = next_time
 
 

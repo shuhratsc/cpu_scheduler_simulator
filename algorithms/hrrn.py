@@ -32,9 +32,10 @@ class HRRN(BaseAlgorithm):
         while self.processes or self.ready_queue or self.running_process:
 
             if self.running_process and self.running_process.remaining_time == 0:
-                self.running_process.end_time = self.time
-                self.running_process.turnaround_time = self.running_process.end_time - self.running_process.arrival_time
+                self.running_process.finish_time = self.time
+                self.running_process.turnaround_time = self.running_process.finish_time - self.running_process.arrival_time
                 self.running_process.turnaround_over_service = self.running_process.turnaround_time / self.running_process.service_time
+                self.running_process.response_time = self.running_process.start_time - self.running_process.arrival_time
                 executed_processes.append(self.running_process)
                 self.running_process = None
 
@@ -116,7 +117,8 @@ class HRRN(BaseAlgorithm):
         Append process to ready queue based on priority.
         :param process: process to be appended
         """
-        bisect.insort(self.ready_queue, process)
+        #bisect.insort(self.ready_queue, process)
+        self.ready_queue.append(process)
 
     def get_next_important_time(self):
         """
