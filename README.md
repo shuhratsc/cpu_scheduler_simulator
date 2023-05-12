@@ -7,6 +7,12 @@ Following algorithms are implemented:
 * Round Robin (RR)
 * Shortest Remaining Task (SRT)
 * Highest Response Ratio Next (HRRN)
+## Environment Setup
+The simulator requires Python 3.6 or higher. Required Python packages are listed in `requirements.txt`.
+They can be installed by executing the following command:
+```bash
+pip3 install -r requirements.txt
+```
 ## Usage
 After cloning the repository and [setting up the environment](#environment-setup),
 you can run the simulator can be run by executing the following command:
@@ -16,7 +22,7 @@ python3 simulate.py -a <algorithm> -p <processes.json>
 The following arguments are available:
 * `-a <algorithm>`: The scheduling algorithm to use. Possible values are
 `FCFS`, `RR`, `SRT` and `HRRN`,
-* `-p <processes.json>`: The path to the JSON file containing the processes to schedule. See the section [below](#processesjson) for more information.
+* `-p <processes.json>`: The path to the JSON file containing the processes to schedule. See the section below for more information.
 
 ### processes.json
 The processes JSON file contains the processes to schedule. It is a JSON array of objects. Each object represents a process and has the following properties:
@@ -75,31 +81,10 @@ The processes JSON file contains the processes to schedule. It is a JSON array o
 
 ## Output
 The simulator will output the following information:
-* The average waiting time
-* The average turnaround time
-* The average response time
+* Average response time
+* Average turnaround time
+* Average ratio of turnaround and service time
 * Throughput
-* CPU utilization
-* A box plot for three metrics:
-    * Waiting time
-    * Turnaround time
-    * Response time
+* CPU total time
+* Simulation time
 
-## Environment Setup
-The simulator requires Python 3.6 or higher. Required Python packages are listed in `requirements.txt`.
-They can be installed by executing the following command:
-```bash
-pip3 install -r requirements.txt
-```
-## Contributing
-Contributions are welcome. Please open an issue or a pull request.
-Read [below](#adding-a-new-algorithm) for information on how to add a new algorithm.
-### Adding a new algorithm
-To add a new algorithm, follow these steps:
-1. Create a new class in `algorithms` module that inherits from `BaseAlgorithm`.
-2. Set `process_compare_prop` to the property that is used to compare processes.
-3. Implement the `run` method.
-4. Import the new algorithm in `algorithms/__init__.py`.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
