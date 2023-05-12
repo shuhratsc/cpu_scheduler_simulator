@@ -5,7 +5,7 @@ class BaseAlgorithm:
     """
     Base class for all algorithms.
     """
-    process_compare_prop = 'arrival_time'
+    #process_compare_prop = 'arrival_time'
 
     def __init__(self, processes):
         """
@@ -20,9 +20,8 @@ class BaseAlgorithm:
         :return: {
             "processes": list of executed processes,
             "time": total time of execution,
-            "cpu_utilization": total CPU utilization,
             "throughput": total throughput,
-            "average_waiting_time": average waiting time,
+            "average_turnaround_over_service": average turnaround over service (used for performance analysis),
             "average_turnaround_time": average turnaround time,
             "average_response_time": average response time
         }

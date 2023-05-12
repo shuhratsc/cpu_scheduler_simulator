@@ -18,10 +18,9 @@ class FCFS(BaseAlgorithm):
         Run the algorithm.
         :return: {
             "processes": list of executed processes,
-            "time": total time of execution,
-            "cpu_utilization": total CPU utilization,
+            "total_time": total time of execution,
             "throughput": total throughput,
-            "average_waiting_time": average waiting time,
+            "average_turnaround_over_service": average waiting time,
             "average_turnaround_time": average turnaround time,
             "average_response_time": average response time
         }
@@ -31,30 +30,32 @@ class FCFS(BaseAlgorithm):
         executed_processes = deque([])
         while self.processes:
             process = self.processes.pop(0)
-            #print(process)
-            if process.state == State.READY:
-                # Set process start and initial response time
-                if process.start_time =='n/a' :
-                    process.start_time = time
-                    process.response_time = process.start_time - process.arrival_time
+            #if no process has arrive. Idle time
+            if process.arrival_time> time:
+                time = process.arrival_time
+            #if process has arrived, meaning ready
+            # Set process start and initial response time
+            if process.start_time =='n/a' :
+                process.start_time = time
+                process.response_time = process.start_time - process.arrival_time
 
-                # Process next 'chunk' of work
-                if process.disk_i_o_inter!= []:
-                    next_inter = process.disk_i_o_inter.pop(0)
-                    if next_inter < process.service_time:
-                        completed = next_inter - (process.service_time - process.remaining_time)
-                        time += completed
-                        process.remaining_time -= completed
-                        process.arrival_time += time+process.disk_i_o_time
-                        self.processes.append(process)
-                        self.processes.sort(key=lambda x: x.arrival_time)
-                else:
-                    time += process.remaining_time
-                    process.finish_time = time
-                    process.turnaround_time = process.finish_time - process.start_time
-                    process.turnaround_over_service = process.turnaround_time / process.service_time
-                    process.state = State.EXECUTED
-                    executed_processes.append(process)
+            # Process next 'chunk' of work
+            if process.disk_i_o_inter!= []:
+                next_inter = process.disk_i_o_inter.pop(0)
+                if next_inter < process.service_time:
+                    completed = next_inter - (process.service_time - process.remaining_time)
+                    time += completed
+                    process.remaining_time -= completed
+                    process.arrival_time += time+process.disk_i_o_time
+                    self.processes.append(process)
+                    self.processes.sort(key=lambda x: x.arrival_time)
+            else:
+                time += process.remaining_time
+                process.finish_time = time
+                process.turnaround_time = process.finish_time - process.start_time
+                process.turnaround_over_service = process.turnaround_time / process.service_time
+                process.state = State.EXECUTED
+                executed_processes.append(process)
                 
         # Calculate throughput
         throughput = len(executed_processes) / time

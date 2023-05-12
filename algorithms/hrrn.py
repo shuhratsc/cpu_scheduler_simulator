@@ -4,11 +4,11 @@ from collections import deque
 from algorithms.base_algorithm import BaseAlgorithm
 
 
-class PreemptiveSJF(BaseAlgorithm):
-    process_compare_prop = 'remaining_time'
+class HRRN(BaseAlgorithm):
+    #process_compare_prop = 'response_ratio'
 
     def __init__(self, processes):
-        processes = sorted(processes, key=lambda x: (x.arrival_time, x.burst_time))
+        processes = sorted(processes, key=lambda x: (x.arrival_time, x.service_time))
         super().__init__(processes)
         self.ready_queue = deque([])
         self.running_process = None
@@ -21,9 +21,8 @@ class PreemptiveSJF(BaseAlgorithm):
         :return: {
             "processes": list of executed processes,
             "time": total time of execution,
-            "cpu_utilization": total CPU utilization,
             "throughput": total throughput,
-            "average_waiting_time": average waiting time,
+            "average_turnaround_over_service": average turnaround over service (used as performance metric),
             "average_turnaround_time": average turnaround time,
             "average_response_time": average response time
         }
@@ -33,9 +32,10 @@ class PreemptiveSJF(BaseAlgorithm):
         while self.processes or self.ready_queue or self.running_process:
 
             if self.running_process and self.running_process.remaining_time == 0:
-                self.running_process.end_time = self.time
-                self.running_process.turnaround_time = self.running_process.end_time - self.running_process.arrival_time
-                self.running_process.waiting_time = self.running_process.turnaround_time - self.running_process.burst_time
+                self.running_process.finish_time = self.time
+                self.running_process.turnaround_time = self.running_process.finish_time - self.running_process.arrival_time
+                self.running_process.turnaround_over_service = self.running_process.turnaround_time / self.running_process.service_time
+                self.running_process.response_time = self.running_process.start_time - self.running_process.arrival_time
                 executed_processes.append(self.running_process)
                 self.running_process = None
 
@@ -45,15 +45,15 @@ class PreemptiveSJF(BaseAlgorithm):
             arrived_processes = self.get_arrived_processes()
 
             if arrived_processes:
-                min_process = min(arrived_processes, key=lambda x: x.burst_time)
+                max_response_process = max(arrived_processes, key=lambda x: x.response_ratio)
 
                 if self.running_process is None:
-                    self.running_process = min_process
+                    self.running_process = max_response_process
                     self.running_process.start_time = self.time
 
-                elif self.running_process.remaining_time > min_process.remaining_time:
+                elif self.running_process.response_ratio < max_response_process.response_ratio:
                     self.append_to_ready_queue(self.running_process)
-                    self.running_process = min_process
+                    self.running_process = max_response_process
                     self.running_process.start_time = self.time
 
                 for _ in range(len(arrived_processes)):
@@ -62,13 +62,16 @@ class PreemptiveSJF(BaseAlgorithm):
                 if self.running_process in arrived_processes:
                     arrived_processes.remove(self.running_process)
                 for process in arrived_processes:
+                    wait_time = self.time - process.arrival_time - (process.service_time - process.remaining_time)
+                    process.response_ratio = (wait_time + process.service_time)/ process.service_time
                     self.append_to_ready_queue(process)
                 arrived_processes.clear()
 
             # If no process is running, then pick the process from ready queue
             if self.running_process is None and self.ready_queue:
                 self.running_process = self.ready_queue.popleft()
-                self.running_process.start_time = self.running_process.start_time or self.time
+                if self.running_process.start_time == 'n/a':
+                    self.running_process.start_time = self.time
 
             # If process is running, then get next important time and update the time
             next_time = self.get_next_important_time()
@@ -78,12 +81,11 @@ class PreemptiveSJF(BaseAlgorithm):
                 self.idle_time += next_time - self.time
             self.time = next_time
 
-        # Calculate total time, CPU utilization, throughput, average waiting time, average turnaround time,
+        # Calculate total time, throughput, average turnaround/service time, average turnaround time,
         # average response time
         total_time = self.time
-        cpu_utilization = (total_time - self.idle_time) / total_time
         throughput = len(executed_processes) / total_time
-        average_waiting_time = sum(process.waiting_time for process in executed_processes) / len(executed_processes)
+        average_turnaround_over_service = sum(process.turnaround_over_service for process in executed_processes) / len(executed_processes)
         average_turnaround_time = sum(process.turnaround_time for process in executed_processes) / len(
             executed_processes)
         average_response_time = sum(process.start_time - process.arrival_time for process in executed_processes) / len(
@@ -91,9 +93,8 @@ class PreemptiveSJF(BaseAlgorithm):
         return {
             "processes": executed_processes,
             "total_time": total_time,
-            "cpu_utilization": cpu_utilization,
             "throughput": throughput,
-            "average_waiting_time": average_waiting_time,
+            "average_turnaround_over_service": average_turnaround_over_service,
             "average_turnaround_time": average_turnaround_time,
             "average_response_time": average_response_time
         }
@@ -116,7 +117,8 @@ class PreemptiveSJF(BaseAlgorithm):
         Append process to ready queue based on priority.
         :param process: process to be appended
         """
-        bisect.insort(self.ready_queue, process)
+        #bisect.insort(self.ready_queue, process)
+        self.ready_queue.append(process)
 
     def get_next_important_time(self):
         """
